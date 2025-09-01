@@ -64,7 +64,7 @@ async def start_cmd(msg: types.Message):
 async def buy_ticket(msg: types.Message):
     token = generate_payment_token()
     pending_tokens[token] = (msg.from_user.id, msg.from_user.username or "")
-    pay_link = f"https://send.monobank.ua/jar/ВАШ_JAR_ID?amount=100&text={token}"
+    pay_link = f"https://send.monobank.ua/jar/{settings.monobank_jar_id or 'YOUR_JAR_ID'}?amount=100&text={token}"
     await msg.answer(
         "1. Перейди по ссылке и оплати 100 грн.\n"
         "2. Комментарий к платежу (code) уже подставлен в ссылку: \n"
