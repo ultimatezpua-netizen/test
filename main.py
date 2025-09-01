@@ -25,11 +25,11 @@ def generate_payment_token(length: int = 8) -> str:
     return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 async def add_ticket(user_id: int, username: Optional[str], payment_id: str):
-    ticket_num = f"T-{{random.randint(1000, 9999)}}"
+    ticket_num = f"T-{random.randint(1000, 9999)}"
     baserow_table = settings.baserow_table_id
     if settings.baserow_token and baserow_table:
         async with ClientSession() as session:
-            url = f"https://api.baserow.io/api/database/rows/table/{{baserow_table}}/"
+            url = f"https://api.baserow.io/api/database/rows/table/{baserow_table}/"
             payload = {
                 "user_id": user_id,
                 "username": username or "",
@@ -40,7 +40,7 @@ async def add_ticket(user_id: int, username: Optional[str], payment_id: str):
                 "status": "Paid"
             }
             headers = {
-                "Authorization": f"Token {{settings.baserow_token}}",
+                "Authorization": f"Token {settings.baserow_token}",
                 "Content-Type": "application/json",
             }
             resp = await session.post(url, headers=headers, json=payload)
@@ -64,15 +64,15 @@ async def start_cmd(msg: types.Message):
 async def buy_ticket(msg: types.Message):
     token = generate_payment_token()
     pending_tokens[token] = (msg.from_user.id, msg.from_user.username or "")
-    pay_link = f"https://send.monobank.ua/jar/ВАШ_JAR_ID?amount=100&text={{token}}"
+    pay_link = f"https://send.monobank.ua/jar/ВАШ_JAR_ID?amount=100&text={token}"
     await msg.answer(
         "1. Перейди по ссылке и оплати 100 грн.\n"
         "2. Комментарий к платежу (code) уже подставлен в ссылку: \n"
-        f"`{{token}}`\n"
+        f"`{token}`\n"
         "3. После успешной обработки придёт билет.",
         parse_mode="Markdown"
     )
-    await msg.answer(f"Ссылка на оплату: {{pay_link}}")
+    await msg.answer(f"Ссылка на оплату: {pay_link}")
 
 async def mono_webhook(request: web.Request):
     if settings.mono_webhook_secret:
@@ -102,7 +102,7 @@ async def mono_webhook(request: web.Request):
     user_id, username = pending_tokens.pop(comment)
     ticket = await add_ticket(user_id, username, payment_id)
     try:
-        await bot.send_message(user_id, f"✅ Оплата получена! Ваш билет: {{ticket}}")
+        await bot.send_message(user_id, f"✅ Оплата получена! Ваш билет: {ticket}")
     except Exception as e:
         logging.error("Failed to send ticket to user %s: %s", user_id, e)
 
