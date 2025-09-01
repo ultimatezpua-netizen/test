@@ -10,6 +10,7 @@ class Settings:
     baserow_token: str | None
     baserow_table_id: str | None
     mono_webhook_secret: str | None
+    monobank_jar_id: str | None
     rules_version: str
     ticket_price: int
     host: str
@@ -20,6 +21,7 @@ settings = Settings(
     baserow_token=os.getenv("BASEROW_TOKEN"),
     baserow_table_id=os.getenv("BASEROW_TABLE_ID"),
     mono_webhook_secret=os.getenv("MONO_WEBHOOK_SECRET"),
+    monobank_jar_id=os.getenv("MONOBANK_JAR_ID"),
     rules_version=os.getenv("RULES_VERSION", "2025-09-05"),
     ticket_price=int(os.getenv("TICKET_PRICE", "10000")),
     host=os.getenv("HOST", "0.0.0.0"),
