@@ -1,51 +1,93 @@
-# Promo Bot
+# Simple Echo Telegram Bot
 
-Бот для выдачи “билетов” после оплаты через Monobank и логирования в Baserow.
+Простой эхо-бот для Telegram, который повторяет все отправленные ему сообщения и отвечает на команду `/start` приветствием.
 
-## MVP
-- /start
-- Кнопка “Купить билет”
-- Генерация токена (связь пользователь ↔ платёж)
-- Webhook /mono-webhook получает уведомление
-- Валидация суммы
-- Запись в Baserow (опционально)
-- Отправка билета пользователю
+## Возможности
 
-## Переменные окружения (.env)
-BOT_TOKEN=123456:ABC...
-BASEROW_TOKEN=...
-BASEROW_TABLE_ID=...
-MONO_WEBHOOK_SECRET=...
-RULES_VERSION=2025-09-05
-TICKET_PRICE=10000
-HOST=0.0.0.0
-PORT=8080
+- **Команда `/start`**: Приветственное сообщение
+- **Эхо-функция**: Бот повторяет любое текстовое сообщение, которое ему отправляют
+- **Безопасность**: Токен бота читается из переменных окружения
 
-## Локально
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python main.py
+## Установка и запуск
 
-## Docker
-docker build -t promo-bot .
-docker run --rm -it -p 8080:8080 --env-file .env promo-bot
+### Предварительные требования
 
-## Fly.io
-fly launch --no-deploy
-fly deploy
-fly secrets set BOT_TOKEN=... MONO_WEBHOOK_SECRET=... TICKET_PRICE=10000
-fly secrets set BASEROW_TOKEN=... BASEROW_TABLE_ID=...
+- Python 3.8 или выше
+- Telegram-бот токен (получить у [@BotFather](https://t.me/botfather))
 
-Проверка:
-curl https://promo-bot.fly.dev/health
+### Шаги установки
 
-## Baserow поля
-user_id, username, ticket_number, payment_id, paid_at, rules_version, status
+1. **Клонируйте репозиторий:**
+   ```bash
+   git clone <repository-url>
+   cd test
+   ```
 
-## Улучшения
-- Хранить pending_tokens в Redis
-- HMAC подпись webhook
-- Админ-статистика
-- Перевод на Telegram Webhook режим
-- Повторная отправка билета по команде
+2. **Создайте виртуальное окружение:**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # Linux/Mac
+   # или
+   .venv\Scripts\activate     # Windows
+   ```
+
+3. **Установите зависимости:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Настройте переменные окружения:**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Отредактируйте файл `.env` и замените `your_telegram_bot_token_here` на ваш реальный токен:
+   ```
+   BOT_TOKEN=123456789:ABCdefGHIjklMNOPqrstUVWxyz123456789
+   ```
+
+5. **Запустите бота:**
+   ```bash
+   python main.py
+   ```
+
+## Безопасность токена
+
+⚠️ **ВАЖНО**: Никогда не добавляйте реальный токен бота в публичные файлы!
+
+- Используйте файл `.env` для хранения токена (он уже добавлен в `.gitignore`)
+- Не коммитьте файл `.env` в git
+- Для production используйте переменные окружения системы
+- Регулярно обновляйте токен через [@BotFather](https://t.me/botfather) если он был скомпрометирован
+
+## Структура проекта
+
+```
+.
+├── main.py           # Основной код бота
+├── requirements.txt  # Зависимости Python
+├── .env.example     # Пример файла переменных окружения
+├── .env             # Ваши переменные окружения (не коммитится)
+└── README.md        # Эта инструкция
+```
+
+## Зависимости
+
+- `python-telegram-bot` - Библиотека для работы с Telegram Bot API
+- `python-dotenv` - Загрузка переменных окружения из файла .env
+
+## Получение токена бота
+
+1. Откройте Telegram и найдите [@BotFather](https://t.me/botfather)
+2. Отправьте команду `/newbot`
+3. Следуйте инструкциям для создания нового бота
+4. Скопируйте полученный токен и добавьте его в файл `.env`
+
+## Production развертывание
+
+Для production рекомендуется:
+
+- Использовать переменные окружения системы вместо файла `.env`
+- Настроить логирование в файлы
+- Использовать webhook вместо polling для лучшей производительности
+- Добавить мониторинг и обработку ошибок
