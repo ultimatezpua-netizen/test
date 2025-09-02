@@ -6,3 +6,24 @@ __pycache__/
 .env.local
 .idea/
 .vscode/
+
+# Go build artifacts
+flyctl
+flyctl-verify
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, build directory
+*.test
+*.out
+coverage.out
+
+# Go module cache
+go.sum
+
+# Temporary files
+/tmp/
+*.tmp
