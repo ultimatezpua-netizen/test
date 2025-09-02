@@ -1,20 +1,38 @@
-FROM python:3.11-slim
+# Build stage
+FROM golang:1.21-alpine AS builder
 
-ENV PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+RUN apk update && apk add --no-cache ca-certificates git
+RUN update-ca-certificates
 
-RUN useradd -m appuser
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy go mod and sum files
+COPY go.mod go.sum ./
 
-COPY . .
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY *.go ./
+
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o flyctl .
+
+# Runtime stage
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+
+# Copy the binary from builder stage
+COPY --from=builder /app/flyctl .
+
+# Create necessary directories
+RUN mkdir -p /tmp /opt
+
+# Make the binary executable
+RUN chmod +x ./flyctl
 
 EXPOSE 8080
 
-USER appuser
-
-HEALTHCHECK CMD python -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 8080)); s.close()" || exit 1
-
-CMD ["python", "main.py"]
+CMD ["./flyctl"]
