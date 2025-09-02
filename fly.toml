@@ -1,4 +1,4 @@
-app = "promo-bot"
+app = "flyctl-app"
 primary_region = "waw"
 
 [build]
