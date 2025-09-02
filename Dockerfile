@@ -1,20 +1,41 @@
-FROM python:3.11-slim
+# Build stage
+FROM golang:1.21-bullseye AS builder
 
-ENV PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
-
-RUN useradd -m appuser
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy go mod files first for better caching
+COPY go.mod go.sum ./
+RUN go mod download
 
-COPY . .
+# Copy source code
+COPY *.go ./
 
-EXPOSE 8080
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -o flyctl .
+
+# Final stage
+FROM debian:bullseye-slim
+
+# Install ca-certificates for HTTPS
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy the binary from builder stage
+COPY --from=builder /app/flyctl .
+
+# Create non-root user
+RUN useradd -m appuser
+RUN chown -R appuser:appuser /app
 
 USER appuser
 
-HEALTHCHECK CMD python -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 8080)); s.close()" || exit 1
+# Expose port (required for Fly.io)
+EXPOSE 8080
 
-CMD ["python", "main.py"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD ./flyctl --help > /dev/null || exit 1
+
+# For Fly.io deployment, start the HTTP server
+CMD ["./flyctl", "server"]

@@ -1,4 +1,4 @@
-app = "promo-bot"
+app = "flyctl-test"
 primary_region = "waw"
 
 [build]
@@ -8,12 +8,14 @@ primary_region = "waw"
   PORT = "8080"
   HOST = "0.0.0.0"
 
+# For a CLI application, we might not need HTTP service, but keeping it for deployment consistency
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = false
+  auto_stop_machines = true
   auto_start_machines = true
-  min_machines_running = 1
+  min_machines_running = 0
 
 [[vm]]
   size = "shared-cpu-1x"
+  memory = "256mb"
