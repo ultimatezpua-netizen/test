@@ -1,19 +1,15 @@
-app = "promo-bot"
+app = "flyctl-fix"
 primary_region = "waw"
 
 [build]
   dockerfile = "Dockerfile"
 
+# CLI tool configuration - no web service needed
 [env]
-  PORT = "8080"
-  HOST = "0.0.0.0"
+  GO_ENV = "production"
 
-[http_service]
-  internal_port = 8080
-  force_https = true
-  auto_stop_machines = false
-  auto_start_machines = true
-  min_machines_running = 1
+# No http_service section needed for CLI tool
+# The application runs as a command-line tool, not a web service
 
 [[vm]]
   size = "shared-cpu-1x"
